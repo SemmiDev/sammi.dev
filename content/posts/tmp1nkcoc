@@ -237,71 +237,9 @@ Error tersebut karena kita telah melanggar aturan: **&mut T** yang di pointing k
 
 
 ```Rust
-fn main() {
-  let mut x = 5;
-  let y = &mut x;    // -+ &mut borrow `x` dimulai disini.
-  *y += 1;           //  |
-  println!("{}", x); // -+ - mencoba mem-borrow kembali `x` disini.
-}  
-```
-
-Scope nya akan konflik karena kita tidak bisa membuat **&x** selama y masih dalam scope yang sama dengan *binding* yang aslinya. Dan ketika kita membuat *scope* untuk *borrowing* diatas kita tandai dengan **{** dan **}**:
-
-```Rust
-let mut x = 5;
-{
-    let y = &mut x; // -+ &mut borrow dimulai disini.
-    *y += 1;        //  |
-}                   // -+ ... borrow berakhir disini.
-println!("{}", x);  // <- `x` di-borrow kembali disini.
-```
-
-Kode diatas tidak akan mendapatkan masalah karena kita mem-borrow dalam scope yang berbeda.
-
+``
 ### Lifetimes
-Ketika kita sudah selesai berinteraksi dengan object maka proses untuk dis-alokasi memory akan dilakukan secara otomatis.  Sehingga kita tidak perlu secara manual untuk membersihkan memory yang sudah digunakan.
+....
 
-Pada *unmanaged* code seperti C++ cukup sulit untuk membuat sebuah program yang benar dan terbebas dari *bug*, sehingga seringkali menimbulkan celah yang bisa *dicompromise*. Ancaman yang paling besar adalah *buffer overflow attack* yaitu ketika seseorang bisa mengakses informasi melebihi dari informasi yang disediakan pada alokasi memory space untuk program, Artinya seseorang bisa melakukan modifikasi di level bawah pada lokasi memori yang berada diluar jangkauan oleh program.
-
-Oke Let’s get started with Lifetimes.
-
-Melakukan references ke *resources* yang dimiliki *binding* lain dapat menjadi rumit. Misalnya, bayangkan jika terdapat operasi :
-
-* Menangani beberapa jenis resource.
-* Meminjamkan references ke resource.
-* Memutuskan hubungan ke resource dan mendisalokasikan memori namun masih memiliki references.
-* Memutuskan untuk menggunakan resource.
-
-Dan boom! *Your reference is pointing to an invalid resource*. Ini yang disebut `“dangling pointer”` atau `“use after free”`. Contoh sederhana untuk situasi diatas adalah :
-
-```Rust
-let r;              // Kita buat binding : `r`.
-{
-    let i = 1;      // Kita buat scoped value untuk : `i`.
-    r = &i;         // Assing reference dari `i` ke `r`.
-}                   // `i` keluar dari scope.
-println!("{}", r);  // tapi `r` masih me-refer ke `i`.
-```
-
-Untuk menghindarai kesalahan diatas, maka kita perlu memastikan bahwa pereferensian tetap dalam *scope* atau ruang lingkupnya.
-
-Ketika kita membuat suatu function yang mengambil argumen dari references maka situasinya akan menjadi lebih kompleks. Perhatikan contoh berikut :
-
-
-```Rust
-fn skip_prefix(line: &str, prefix: &str) -> &str {
-  // ...
-}
-let line = "lang:en=Hello World!";
-let lang = "en";
-let v;
-{
-  let p = format!("lang:{}=", lang);  // -+ `p` didalam scope
-  v = skip_prefix(line, p.as_str());  //  |
-}                                       // -+ `p` keluar dari scope.
-println!("{}", v);
-```
-
-Di sini kita memiliki fungsi `skip_prefix` yang mengambil dua referensi **&str** sebagai parameter dan mengembalikan referensi tunggal **&str**. Kita panggil dengan cara mem-passing ke dalam *references* pada p: dua variable dengan lifetimes yang berbeda.
 
 [Referensi](https://doc.rust-lang.org/stable/book)
